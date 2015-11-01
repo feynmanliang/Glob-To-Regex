@@ -64,7 +64,7 @@ instance Applicative Logger where
 instance Monad Logger where
   return a = Logger (a,[])
   (Logger (a, l)) >>= f = case f a of
-    Logger (b,l') -> Logger (b,l' ++ l)
+    Logger (b,l') -> Logger (b,l ++ l')
 
 runLogger :: Logger a -> (a, Log)
 runLogger = execLogger
