@@ -45,7 +45,13 @@ escape c | c `elem` regexChars = record "escape" >> return ('\\' : [c])
          | otherwise = return [c]
   where regexChars = "\\+()^$.{}]|"
 
-data Logger a = L (a, Log)
+-- `newtype` ~== `data`, except newtype is restricted to single constructor with
+-- one field
+-- this makes the newtype isomorphic to the type of the field, removing data
+-- constructor overhead
+newtype Logger a = Logger { execLogger :: (a, Log) }
+
+-- `type` creates a type alias, `newtype` declares a new type
 type Log = [String]
 
 instance Functor Logger where
@@ -56,13 +62,13 @@ instance Applicative Logger where
   (<*>) = ap
 
 instance Monad Logger where
-  return a = L (a,[])
-  (L (a, l)) >>= f = case f a of
-    L (b,l') -> L (b,l' ++ l)
+  return a = Logger (a,[])
+  (Logger (a, l)) >>= f = case f a of
+    Logger (b,l') -> Logger (b,l' ++ l)
 
 runLogger :: Logger a -> (a, Log)
-runLogger (L (a,l)) = (a,reverse l)
+runLogger = execLogger
 
 record :: String -> Logger ()
-record s = L ((), [s])
+record s = Logger ((), [s])
 
