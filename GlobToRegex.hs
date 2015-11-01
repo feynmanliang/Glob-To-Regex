@@ -33,6 +33,7 @@ globToRegex' ('[':c:cs) = do
 globToRegex' ('[':_) =
   fail "unterminated character class"
 globToRegex' (c:cs) = liftM2 (++) (escape c) (globToRegex' cs)
+
 charClass :: String -> Logger String
 charClass (']':cs) = (']':)`liftM` globToRegex' cs
 charClass (c:cs) = (c:) `liftM` charClass cs
